@@ -2,7 +2,7 @@ from utils import read_file, manhattan_distance
 from collections import namedtuple
 
 
-def process_wire(wire):
+def points_from_wire(wire):
     x, y = 0, 0
     points = []
     for point in wire.split(','):
@@ -24,11 +24,11 @@ def process_wire(wire):
 
 
 def calc_dist(wires):
-    w0 = set(process_wire(wires[0]))
-    w1 = set(process_wire(wires[1]))
+    p0 = set(points_from_wire(wires[0]))
+    p1 = set(points_from_wire(wires[1]))
 
     dist = 2**32
-    for point in w0.intersection(w1):
+    for point in p0.intersection(p1):
         d = manhattan_distance((0, 0), point)
         if d < dist:
             dist = d
@@ -36,13 +36,13 @@ def calc_dist(wires):
 
 
 def calc_steps(wires):
-    w0 = process_wire(wires[0])
-    w1 = process_wire(wires[1])
+    p0 = points_from_wire(wires[0])
+    p1 = points_from_wire(wires[1])
 
     steps = 2**32
-    for intersection in set(w0).intersection(set(w1)):
-        a = w0.index(intersection) + 1
-        b = w1.index(intersection) + 1
+    for intersection in set(p0).intersection(set(p1)):
+        a = p0.index(intersection) + 1
+        b = p1.index(intersection) + 1
         if a + b < steps:
             steps = a + b
     return steps

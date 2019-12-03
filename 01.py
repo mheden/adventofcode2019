@@ -8,8 +8,7 @@ def calc_fuel(mass):
 
 def calc_fuel_recursive(mass):
     total = 0
-    res = mass
-    res = calc_fuel(res)
+    res = calc_fuel(mass)
     while res > 0:
         total += res
         res = calc_fuel(res)
