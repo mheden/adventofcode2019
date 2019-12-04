@@ -1,5 +1,4 @@
 from utils import read_file, manhattan_distance
-from collections import namedtuple
 
 
 def points_from_wire(wire):
@@ -24,11 +23,11 @@ def points_from_wire(wire):
 
 
 def calc_dist(wires):
-    p0 = set(points_from_wire(wires[0]))
-    p1 = set(points_from_wire(wires[1]))
+    p0 = points_from_wire(wires[0])
+    p1 = points_from_wire(wires[1])
 
     dist = 2**32
-    for point in p0.intersection(p1):
+    for point in set(p0).intersection(set(p1)):
         d = manhattan_distance((0, 0), point)
         if d < dist:
             dist = d
