@@ -1,4 +1,4 @@
-from utils import read_file, manhattan_distance
+from utils import read_file
 
 
 def check_password(pwd):
@@ -36,10 +36,7 @@ assert(check_password('111111') is True)
 assert(check_password('223450') is False)
 assert(check_password('123789') is False)
 
-success = 0
-for pwd in range(168630, 718098):
-    success += check_password(str(pwd))
-print(success)
+print(sum([check_password(str(pwd)) for pwd in range(168630, 718098)]))
 
 
 print("#--- part2 ---#")
@@ -48,7 +45,4 @@ assert(check_password2('112233') is True)
 assert(check_password2('123444') is False)
 assert(check_password2('111122') is True)
 
-success = 0
-for pwd in range(168630, 718098):
-    success += check_password2(str(pwd))
-print(success)
+print(sum([check_password2(str(pwd)) for pwd in range(168630, 718098)]))
