@@ -1,9 +1,8 @@
-import math
 from utils import read_file
 
 
 def calc_fuel(mass):
-    return math.floor(mass / 3) - 2
+    return mass // 3 - 2
 
 
 def calc_fuel_recursive(mass):
