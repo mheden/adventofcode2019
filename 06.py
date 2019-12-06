@@ -18,7 +18,7 @@ def get_connections(map_):
 
 def orbits(map_):
     connections = get_connections(map_)
-    return sum([calc_parents(connections, n) for n in connections.keys()])
+    return sum([calc_parents(connections, node) for node in connections])
 
 
 def get_ancestors(connections, node):
@@ -32,8 +32,8 @@ def transfers(map_, from_, to_):
     connections = get_connections(map_)
     a = get_ancestors(connections, from_)
     b = get_ancestors(connections, to_)
-    common = [i for i in a if i in b]
-    return (a.index(common[0]) - 1) + (b.index(common[0]) - 1)
+    common = [i for i in a if i in b][0]
+    return (a.index(common) - 1) + (b.index(common) - 1)
 
 
 print("#--- part1 ---#")

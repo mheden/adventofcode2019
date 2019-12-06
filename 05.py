@@ -49,7 +49,7 @@ def run(ip, lst, inputs, outputs):
         set_value(ip + 3, a, lst, v1 * v2)
         ip += 4
     elif op == OP_INPUT:
-        set_value(ip + 1, c, lst, inputs.pop())
+        set_value(ip + 1, c, lst, inputs.pop(0))
         ip += 2
     elif op == OP_OUTPUT:
         outputs.append(get_value(ip + 1, c, lst))
@@ -83,8 +83,7 @@ def run(ip, lst, inputs, outputs):
             set_value(ip + 3, a, lst, 0)
         ip += 4
     else:
-        print('unknown opcode=%d' % op)
-        assert(False)
+        raise RuntimeError('invalid opcode: %d' % op)
     return run(ip, lst, inputs, outputs)
 
 
