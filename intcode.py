@@ -13,24 +13,27 @@ class Task():
             for i in range(len(program)):
                 self.mem[i] = program[i]
         if len(inputs) > 0:
-            self.receive(inputs)
+            self.write(inputs)
 
     def __repr__(self):
-        return 'task(%s, ip=%d bp=%d in=%s out=%s)' % (self.name, self.regs['ip'], self.regs['bp'], self.inputs, self.outputs)
+        return 'task(%s, ip=%d bp=%d in=%s out=%s)' % (self.name,
+                                                       self.regs['ip'],
+                                                       self.regs['bp'],
+                                                       self.inputs,
+                                                       self.outputs)
 
     def _log(self, msg):
         if self.verbose:
             print("[task %s] %s" % (self.name, msg))
 
-    def receive(self, inputs):
+    def write(self, inputs):
         if isinstance(inputs, list):
             for i in inputs:
-                self.receive(i)
+                self.write(i)
         else:
-            self._log('receive %d' % inputs)
             self.inputs.append(inputs)
 
-    def send(self):
+    def read(self):
         data = []
         while True:
             try:
@@ -98,7 +101,7 @@ class Intcode():
             print("%-40s  %s" % (task, self.state_names[self.states[task]]))
 
     def connect(self, from_, to_):
-        self._log("connect %s -> %s)" % (from_, to_))
+        self._log("connect %s -> %s" % (from_.name, to_.name))
         if from_ not in self.channels:
             self.channels[from_] = []
         self.channels[from_].append(to_)
@@ -107,9 +110,13 @@ class Intcode():
         if not isinstance(tasks, list):
             tasks = [tasks]
         for task in tasks:
-            self._log("load %s" % task)
             self.tasks.append(task)
             self.states[task] = Intcode.STATE_NONE
+            self._set_state(task, Intcode.STATE_READY)
+
+    def send(self, task, values):
+        task.write(values)
+        if self.states[task] != Intcode.STATE_DONE:
             self._set_state(task, Intcode.STATE_READY)
 
     def run(self, tasks=[]):
@@ -118,19 +125,19 @@ class Intcode():
             raise RuntimeError("No tasks")
 
         state = Intcode.STATE_NONE
-        while state != Intcode.STATE_DONE:
+        while state != Intcode.STATE_DONE and state != Intcode.STATE_WAIT:
             state = Intcode.STATE_NONE
             for task in self.tasks:
                 if self.states[task] != Intcode.STATE_READY:
                     continue
-                res = self._task_run(task)
-                state |= res
+                self._task_run(task)
                 if task in self.channels:
-                    value = task.send()
+                    value = task.read()
                     for receiver in self.channels[task]:
-                        receiver.receive(value)
-                        if self.states[receiver] != Intcode.STATE_DONE:
-                            self._set_state(receiver, Intcode.STATE_READY)
+                        self._log("send %s from %s to %s" % (value, task.name, receiver.name))
+                        self.send(receiver, value)
+            for s in self.states.values():
+                state |= s
         return state
 
     def _pos(self, task, modes):
@@ -157,6 +164,7 @@ class Intcode():
         # print(task.regs['ip'], opcode, task.mem[task.regs['ip']:task.regs['ip']+6])
 
         if op == Intcode.OP_HALT:
+            self._trace('%4d:\tHALT' % (task.regs['ip']))
             return Intcode.STATE_DONE
 
         elif op == Intcode.OP_ADD:
@@ -178,6 +186,7 @@ class Intcode():
                 task.mem[p[0]] = task.inputs.pop(0)
                 task.regs['ip'] += 2
             else:
+                self._trace('%4d:\tIN (buffer empty)' % (task.regs['ip']))
                 return Intcode.STATE_WAIT
 
         elif op == Intcode.OP_OUTPUT:
